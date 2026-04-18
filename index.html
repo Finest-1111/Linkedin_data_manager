@@ -1,223 +1,441 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Core Network | Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreNet | Intelligence Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg: #030406;
+            --surface: #0a0c10;
+            --accent: #00f2ff;
+            --accent-dim: rgba(0, 242, 255, 0.1);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-w: 280px;
+            --glass: blur(20px) saturate(180%);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<style>
-:root {
---bg-dark: #050608;
---accent: #00f2ff;
---accent-glow: rgba(0, 242, 255, 0.2);
---glass: rgba(15, 20, 25, 0.85);
---border: rgba(255, 255, 255, 0.08);
---text: #e0e6ed;
---sidebar-width: 280px;
-}
-* { box-sizing: border-box; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-.bg-animate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 10% 10%, #101a2b 0%, #050608 100%); z-index: -1; }
-.app-layout { display: flex; width: 100%; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
 
-.sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0; background: var(--glass); backdrop-filter: blur(25px); border-right: 1px solid var(--border); z-index: 2000; overflow-y: auto; }
-.sidebar-content { display: flex; flex-direction: column; height: 100%; padding: 30px 20px; }
-.logo { font-size: 24px; font-weight: 800; margin-bottom: 30px; }
-.logo span { color: var(--accent); }
-.stats-list { flex-grow: 1; margin-bottom: 20px; }
-.stat-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .app-wrapper { display: flex; min-height: 100vh; }
 
-.mode-toggle-box { margin-bottom: 20px; padding-top: 15px; border-top: 1px solid var(--border); }
-.toggle-container { background: #111; border: 1px solid var(--border); padding: 8px 12px; border-radius: 30px; display: flex; align-items: center; cursor: pointer; }
-.mode-knob { width: 16px; height: 16px; background: #333; border-radius: 50%; margin-right: 10px; }
-.recruiter-active .mode-knob { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); transform: translateX(4px); }
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
 
-.sidebar-footer { padding-top: 15px; border-top: 1px solid var(--border); }
-.btn-util { width: 100%; background: none; border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; margin-bottom: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
-.primary-util { background: rgba(0, 242, 255, 0.1); border-color: var(--accent); color: var(--accent); }
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; margin-bottom: 2.5rem; }
+        .logo span { color: var(--accent); }
 
-.main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px; }
-.glass-card { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 30px; }
+        .stats-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+        .stat-header { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .progress-bar { height: 4px; background: #1a1f26; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.8s ease; }
 
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-input { background: rgba(0,0,0,0.5); border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: white; font-size: 14px; }
-.add-btn { background: var(--accent); color: #000; font-weight: 800; border: none; border-radius: 8px; cursor: pointer; }
+        /* --- Buttons --- */
+        .action-group { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .btn {
+            width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-main); font-weight: 600; font-size: 0.8rem;
+            cursor: pointer; margin-bottom: 0.5rem; transition: var(--transition);
+            display: block; text-align: center;
+        }
+        .btn:hover { background: rgba(255,255,255,0.05); border-color: var(--text-dim); }
+        .btn-primary { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+        .btn-primary:hover { background: var(--accent); color: #000; }
 
-.recruiter-active .hide-in-recruiter { display: none !important; }
-.recruiter-active #form-section { opacity: 0; height: 0; overflow: hidden; }
+        /* --- Main Content --- */
+        .main { margin-left: var(--sidebar-w); flex: 1; padding: 3rem; max-width: 1200px; }
+        
+        .glass-panel {
+            background: rgba(15, 20, 25, 0.4);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+        .glass-panel.editing { border-color: var(--accent); box-shadow: 0 0 30px rgba(0, 242, 255, 0.15); }
+        
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        input {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 0.8rem 1rem;
+            border-radius: 10px; color: white; font-size: 0.9rem; width: 100%;
+        }
+        input:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.5); }
 
-.table-responsive { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 650px; }
-th, td { padding: 15px; border-bottom: 1px solid var(--border); }
-th { font-size: 11px; color: #667; text-transform: uppercase; }
+        /* --- Table Styling --- */
+        .table-wrap { width: 100%; overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; padding: 1rem; border-bottom: 1px solid var(--border); letter-spacing: 1px; }
+        td { padding: 1.2rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .name-link { 
+            font-weight: 800; 
+            color: var(--accent); 
+            text-decoration: none; 
+            border-bottom: 1px solid transparent; 
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .name-link:hover { border-bottom-color: var(--accent); text-shadow: 0 0 10px var(--accent-dim); }
+        
+        .row-premium { background: linear-gradient(90deg, rgba(0,242,255,0.03) 0%, transparent 100%); border-left: 3px solid var(--accent); }
+        
+        .status-btn { 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border); 
+            color: var(--text-dim); padding: 5px 12px; border-radius: 6px; cursor: pointer; 
+            margin-right: 5px; font-size: 0.7rem; font-weight: 700; transition: var(--transition);
+        }
+        .status-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-.row-premium { border-left: 3px solid var(--accent); }
+        /* --- Mode Logic --- */
+        .recruiter-active .hide-in-recruiter { display: none !important; }
+        .recruiter-active #form-section { display: none; }
+        
+        .toggle-mode {
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2);
+            margin-bottom: 1rem; border: 1px solid var(--border);
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #333; transition: var(--transition); }
+        .recruiter-active .dot { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
 
-.toast-container { position: fixed; bottom: 20px; right: 20px; }
-.toast { background: #111; color: var(--accent); padding: 12px 20px; border-radius: 8px; margin-top: 10px; }
-</style>
+        /* --- Notifications --- */
+        .toast-area { position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.75rem; z-index: 9999; }
+        .toast { background: var(--accent); color: #000; padding: 14px 24px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-
 <body>
 
-<div class="bg-animate"></div>
+<div class="app-wrapper">
+    <aside class="sidebar">
+        <div class="logo">CORE<span>NET</span></div>
+        <div class="stats-section" id="collegeStats">
+            </div>
 
-<div class="app-layout">
-<aside class="sidebar" id="sidebar">
-<div class="sidebar-content">
-<div class="logo">CORE<span>NET</span></div>
+        <div class="action-group">
+            <div class="toggle-mode" onclick="toggleRecruiterMode()">
+                <div class="dot"></div>
+                <span id="mode-label" style="font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">STANDARD MODE</span>
+            </div>
+            <button class="btn btn-primary" onclick="generatePDF()">Intelligence PDF</button>
+            <button class="btn" onclick="exportToFile()">Cloud Backup</button>
+            <button class="btn" onclick="document.getElementById('importFile').click()">Restore Intelligence</button>
+            <input type="file" id="importFile" hidden onchange="importFromFile(event)">
+        </div>
+    </aside>
 
-<div id="collegeStats" class="stats-list"></div>
+    <main class="main">
+        <header style="margin-bottom: 3rem;">
+            <h1 id="main-title" style="font-size: 2.8rem; font-weight: 800; letter-spacing: -1px;">Network Manager</h1>
+            <p id="totalCount" style="color: var(--text-dim); font-size: 1rem;">Monitoring 0 active connections</p>
+        </header>
 
-<div class="mode-toggle-box">
-<div class="toggle-container" onclick="toggleRecruiterMode()">
-<div id="mode-knob" class="mode-knob"></div>
-<span id="mode-label">STANDARD</span>
+        <section id="form-section" class="glass-panel">
+            <input type="hidden" id="editId" value="">
+            <div class="grid-4">
+                <input id="nameIn" placeholder="Identity Name">
+                <input id="orgIn" placeholder="Organization / College">
+                <input id="qualIn" placeholder="Quality (A, A+, B)">
+                <input id="linkIn" placeholder="LinkedIn URL">
+            </div>
+            <div style="margin-top: 1.5rem; display: flex; gap: 12px;">
+                <button id="mainActionBtn" class="btn btn-primary" style="width: auto; padding: 0.8rem 2.5rem;" onclick="saveEntry()">+ Add Connection</button>
+                <button id="cancelBtn" class="btn" style="width: auto; padding: 0.8rem 2.5rem; display: none;" onclick="clearForm()">Abort Edit</button>
+            </div>
+        </section>
+
+        <div style="position: relative; margin-bottom: 2.5rem;">
+            <input id="searchBar" style="width: 100%; background: var(--surface); border-radius: 14px; padding: 1rem 1.5rem; border: 1px solid var(--border);" placeholder="Search database for names, orgs, or priority levels..." onkeyup="runFilters()">
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th class="hide-in-recruiter">Organization</th>
+                        <th>Tier</th>
+                        <th class="hide-in-recruiter">Pipeline Status</th>
+                        <th>Control</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </main>
 </div>
-</div>
 
-<div class="sidebar-footer">
-<button class="btn-util primary-util" onclick="generatePDF()">Generate PDF</button>
-<button class="btn-util" onclick="exportToFile()">Backup</button>
-<button class="btn-util" onclick="document.getElementById('importFile').click()">Import</button>
-<input type="file" id="importFile" hidden onchange="importFromFile(event)">
-</div>
-</div>
-</aside>
-
-<main class="main-content">
-<h1 id="main-title">Network Manager</h1>
-<p id="totalCount">0 Connections</p>
-
-<section class="glass-card" id="form-section">
-<input type="hidden" id="editId">
-<div class="form-grid">
-<input id="nameIn" placeholder="Name">
-<input id="orgIn" placeholder="Organization">
-<input id="qualIn" placeholder="Quality">
-<input id="linkIn" placeholder="LinkedIn">
-<button onclick="saveEntry()">Add</button>
-</div>
-</section>
-
-<input id="searchBar" placeholder="Search..." onkeyup="runFilters()">
-
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Org</th>
-<th>Quality</th>
-<th>Status</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-
-</main>
-</div>
-
-<div id="toast-container"></div>
+<div id="toast-container" class="toast-area"></div>
 
 <script>
-let networkData = JSON.parse(localStorage.getItem('core_net_v7')) || [];
-let recruiterMode = false;
+    let networkData = JSON.parse(localStorage.getItem('core_net_v7')) || [];
+    let recruiterMode = false;
 
-window.onload = renderTable;
+    window.onload = renderTable;
 
-function showToast(msg){
-const t=document.createElement('div');
-t.className='toast';
-t.innerText=msg;
-document.getElementById('toast-container').appendChild(t);
-setTimeout(()=>t.remove(),3000);
-}
+    function showToast(msg) {
+        const container = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerText = msg;
+        container.appendChild(t);
+        setTimeout(() => {
+            t.style.opacity = '0';
+            setTimeout(() => t.remove(), 400);
+        }, 3000);
+    }
 
-function renderTable(){
-const tbody=document.getElementById('tableBody');
-tbody.innerHTML='';
-networkData.forEach(item=>{
-const tr=document.createElement('tr');
-tr.innerHTML=`
-<td>${item.name}</td>
-<td>${item.college}</td>
-<td>${item.post}</td>
-<td>${item.sent?'✓':''} ${item.made?'✓':''}</td>
-<td>
-<button onclick="deleteItem(${item.id})">X</button>
-</td>`;
-tbody.appendChild(tr);
-});
-document.getElementById('totalCount').innerText=networkData.length+" Connections";
-}
+    // --- Core Rendering Logic ---
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        const stats = {};
 
-function saveEntry(){
-const name=nameIn.value;
-const org=orgIn.value;
-if(!name||!org)return;
+        networkData.forEach(item => {
+            // Stats calculation
+            const norm = (item.college || "OTHER").toUpperCase().split(' ')[0];
+            stats[norm] = (stats[norm] || 0) + 1;
 
-networkData.push({
-id:Date.now(),
-name,
-college:org,
-post:qualIn.value||'A',
-link:linkIn.value||'#',
-sent:false,
-made:false
-});
+            const tr = document.createElement('tr');
+            if (item.post && item.post.toUpperCase().includes('A+')) tr.className = 'row-premium';
 
-localStorage.setItem('core_net_v7',JSON.stringify(networkData));
-renderTable();
-}
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; flex-direction: column;">
+                        <a class="name-link" onclick="openLinkedIn('${item.link}')">${item.name}</a>
+                        <span onclick="loadEdit(${item.id})" 
+                              style="font-size: 0.65rem; color: var(--text-dim); cursor: pointer; margin-top: 5px; letter-spacing: 1px; font-weight: 600;">
+                              MOD_DATA // ${item.id.toString().slice(-4)}
+                        </span>
+                    </div>
+                </td>
+                <td class="hide-in-recruiter" style="cursor: pointer" onclick="loadEdit(${item.id})">${item.college}</td>
+                <td><span style="color: var(--accent); font-weight: 800;">${item.post}</span></td>
+                <td class="hide-in-recruiter">
+                    <button class="status-btn ${item.sent ? 'active' : ''}" onclick="updateStatus(${item.id}, 'sent')">SENT</button>
+                    <button class="status-btn ${item.made ? 'active' : ''}" onclick="updateStatus(${item.id}, 'MADE')">MADE</button>
+                </td>
+                <td>
+                    <button onclick="deleteItem(${item.id})" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1.2rem; transition: 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">&times;</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-function deleteItem(id){
-networkData=networkData.filter(x=>x.id!==id);
-localStorage.setItem('core_net_v7',JSON.stringify(networkData));
-renderTable();
-}
+        document.getElementById('totalCount').innerText = `Monitoring ${networkData.length} active nodes in network`;
+        renderStats(stats);
+    }
 
-function runFilters(){
-const q=searchBar.value.toLowerCase();
-document.querySelectorAll('tbody tr').forEach(tr=>{
-tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none';
-});
-}
+    function renderStats(stats) {
+        const container = document.getElementById('collegeStats');
+        const total = networkData.length || 1;
+        container.innerHTML = `<p style="font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 1.2rem; font-weight: 800; letter-spacing: 1.5px;">Org Distribution</p>`;
+        
+        Object.entries(stats).sort((a,b) => b[1] - a[1]).forEach(([name, count]) => {
+            const pct = (count / total) * 100;
+            container.innerHTML += `
+                <div class="stat-card">
+                    <div class="stat-header"><span>${name}</span><span>${count}</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+                </div>`;
+        });
+    }
 
-function toggleRecruiterMode(){
-recruiterMode=!recruiterMode;
-document.body.classList.toggle('recruiter-active');
-}
+    // --- Link Handling ---
+    function openLinkedIn(url) {
+        if (!url || url === '#' || url.trim() === "") {
+            showToast("No LinkedIn URL found for this identity");
+            return;
+        }
+        const validUrl = url.startsWith('http') ? url : `https://${url}`;
+        window.open(validUrl, '_blank');
+    }
 
-function exportToFile(){
-const blob=new Blob([JSON.stringify(networkData)]);
-const a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
-a.download='backup.json';
-a.click();
-}
+    // --- Form & Data Logic ---
+    function loadEdit(id) {
+        if (recruiterMode) return;
+        const item = networkData.find(x => x.id === id);
+        if (!item) return;
 
-function importFromFile(e){
-const reader=new FileReader();
-reader.onload=(ev)=>{
-networkData=JSON.parse(ev.target.result);
-localStorage.setItem('core_net_v7',JSON.stringify(networkData));
-renderTable();
-};
-reader.readAsText(e.target.files[0]);
-}
+        document.getElementById('editId').value = item.id;
+        document.getElementById('nameIn').value = item.name;
+        document.getElementById('orgIn').value = item.college;
+        document.getElementById('qualIn').value = item.post;
+        document.getElementById('linkIn').value = item.link === '#' ? '' : item.link;
 
-async function generatePDF(){
-const {jsPDF}=window.jspdf;
-const doc=new jsPDF();
-doc.text("Network Report",10,10);
-doc.save("report.pdf");
-}
+        document.getElementById('form-section').classList.add('editing');
+        document.getElementById('mainActionBtn').innerText = "Update Identity";
+        document.getElementById('cancelBtn').style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast("Accessing " + item.name + "'s record...");
+    }
+
+    function clearForm() {
+        document.getElementById('editId').value = "";
+        ["nameIn", "orgIn", "qualIn", "linkIn"].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('form-section').classList.remove('editing');
+        document.getElementById('mainActionBtn').innerText = "+ Add Connection";
+        document.getElementById('cancelBtn').style.display = "none";
+    }
+
+    function saveEntry() {
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('nameIn').value.trim();
+        const org = document.getElementById('orgIn').value.trim();
+        const link = document.getElementById('linkIn').value.trim();
+        
+        if (!name || !org) return showToast("Name and Org are required fields");
+
+        if (id) {
+            const index = networkData.findIndex(x => x.id == id);
+            networkData[index] = {
+                ...networkData[index],
+                name,
+                college: org,
+                post: document.getElementById('qualIn').value || 'A',
+                link: link || '#'
+            };
+            showToast("Identity Overwritten");
+        } else {
+            networkData.push({
+                id: Date.now(),
+                name, college: org,
+                post: document.getElementById('qualIn').value || 'A',
+                link: link || '#',
+                sent: false, made: false
+            });
+            showToast("New Node Added to Core");
+        }
+
+        syncData();
+        clearForm();
+    }
+
+    function updateStatus(id, key) {
+        const item = networkData.find(x => x.id === id);
+        if (item) { 
+            item[key.toLowerCase()] = !item[key.toLowerCase()]; 
+            syncData(); 
+        }
+    }
+
+    function deleteItem(id) {
+        if (confirm("Permanently erase this connection from core?")) {
+            networkData = networkData.filter(x => x.id !== id);
+            syncData();
+            showToast("Record Erased");
+        }
+    }
+
+    function syncData() {
+        localStorage.setItem('core_net_v7', JSON.stringify(networkData));
+        renderTable();
+    }
+
+    function runFilters() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(tr => {
+            tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    function toggleRecruiterMode() {
+        recruiterMode = !recruiterMode;
+        document.body.classList.toggle('recruiter-active');
+        document.getElementById('mode-label').innerText = recruiterMode ? "RECRUITER MODE" : "STANDARD MODE";
+        document.getElementById('main-title').innerText = recruiterMode ? "Talent Pipeline" : "Network Manager";
+        if (recruiterMode) clearForm();
+    }
+
+    // --- External Tools ---
+    function exportToFile() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(networkData, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `CoreNet_Backup_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showToast("Backup Created");
+    }
+
+    function importFromFile(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                networkData = JSON.parse(ev.target.result);
+                syncData();
+                showToast("Intelligence Restored");
+            } catch (err) {
+                showToast("Error: Invalid File Format");
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    async function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text("Core Intelligence: Network Report", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+
+        const rows = networkData.map(i => [i.name, i.college, i.post, i.sent?'YES':'NO', i.made?'YES':'NO']);
+        
+        doc.autoTable({
+            startY: 35,
+            head: [['Name', 'Organization', 'Tier', 'Msg Sent', 'Connected']],
+            body: rows,
+            headStyles: { fillColor: [0, 242, 255], textColor: [0,0,0], fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            margin: { left: 14, right: 14 }
+        });
+
+        doc.save(`CoreNet_Report_${Date.now()}.pdf`);
+        showToast("PDF Exported Successfully");
+    }
 </script>
-
 </body>
 </html>
