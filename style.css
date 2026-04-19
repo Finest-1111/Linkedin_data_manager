@@ -1,0 +1,127 @@
+        :root {
+            --bg: #030406;
+            --surface: #0a0c10;
+            --accent: #00f2ff;
+            --accent-dim: rgba(0, 242, 255, 0.1);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-w: 280px;
+            --glass: blur(20px) saturate(180%);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-wrapper { display: flex; min-height: 100vh; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; margin-bottom: 2.5rem; }
+        .logo span { color: var(--accent); }
+
+        .stats-section { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+        .stat-header { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .progress-bar { height: 4px; background: #1a1f26; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.8s ease; }
+
+        /* --- Buttons --- */
+        .action-group { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .btn {
+            width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-main); font-weight: 600; font-size: 0.8rem;
+            cursor: pointer; margin-bottom: 0.5rem; transition: var(--transition);
+            display: block; text-align: center;
+        }
+        .btn:hover { background: rgba(255,255,255,0.05); border-color: var(--text-dim); }
+        .btn-primary { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+        .btn-primary:hover { background: var(--accent); color: #000; }
+
+        /* --- Main Content --- */
+        .main { margin-left: var(--sidebar-w); flex: 1; padding: 3rem; max-width: 1200px; }
+        
+        .glass-panel {
+            background: rgba(15, 20, 25, 0.4);
+            backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+        .glass-panel.editing { border-color: var(--accent); box-shadow: 0 0 30px rgba(0, 242, 255, 0.15); }
+        
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        input {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 0.8rem 1rem;
+            border-radius: 10px; color: white; font-size: 0.9rem; width: 100%;
+        }
+        input:focus { outline: none; border-color: var(--accent); background: rgba(0,0,0,0.5); }
+
+        /* --- Table Styling --- */
+        .table-wrap { width: 100%; overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; padding: 1rem; border-bottom: 1px solid var(--border); letter-spacing: 1px; }
+        td { padding: 1.2rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .name-link { 
+            font-weight: 800; 
+            color: var(--accent); 
+            text-decoration: none; 
+            border-bottom: 1px solid transparent; 
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .name-link:hover { border-bottom-color: var(--accent); text-shadow: 0 0 10px var(--accent-dim); }
+        
+        .row-premium { background: linear-gradient(90deg, rgba(0,242,255,0.03) 0%, transparent 100%); border-left: 3px solid var(--accent); }
+        
+        .status-btn { 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border); 
+            color: var(--text-dim); padding: 5px 12px; border-radius: 6px; cursor: pointer; 
+            margin-right: 5px; font-size: 0.7rem; font-weight: 700; transition: var(--transition);
+        }
+        .status-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        /* --- Mode Logic --- */
+        .recruiter-active .hide-in-recruiter { display: none !important; }
+        .recruiter-active #form-section { display: none; }
+        
+        .toggle-mode {
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2);
+            margin-bottom: 1rem; border: 1px solid var(--border);
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #333; transition: var(--transition); }
+        .recruiter-active .dot { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+        /* --- Notifications --- */
+        .toast-area { position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.75rem; z-index: 9999; }
+        .toast { background: var(--accent); color: #000; padding: 14px 24px; border-radius: 10px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
